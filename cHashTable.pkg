@@ -1,0 +1,237 @@
+//  cHashTable class:
+//  Created by Erik Svensson and published on eriksven.com in February 2013
+
+#IFNDEF NULL_ENTRY
+Global_Variable Variant NULL_ENTRY
+Move (Character(0)) to NULL_ENTRY
+#ENDIF
+
+Class _cHashEntry is a Array
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        Property Variant[] pvaValues
+        Property Integer[] piaSortOrders
+    End_Procedure
+
+    Function _Update Variant v Variant[] va Integer i Returns Variant[]
+        Move v to va[i]
+        Function_Return va
+    End_Function
+
+    Procedure Put String sKey Integer iSortOrder Variant vValue
+        Integer i iItem
+        String sStoredKey
+        Variant[] vaValues
+        Integer[] iaSortOrders
+        Move 0 to i
+        While (i <= Item_Count(Self))
+            Get Value i to sStoredKey
+            If (sStoredKey = sKey) Begin
+                Get pvaValues to vaValues
+                Get _Update vValue vaValues i to vaValues
+                Set pvaValues to vaValues
+                Procedure_Return
+            End
+            Increment i
+        Loop
+        Decrement i
+        Set Value i to sKey
+        Get pvaValues to vaValues
+        Move (ResizeArray(vaValues,i+1,vValue)) to vaValues
+        Set pvaValues to vaValues
+        
+        Get piaSortOrders to iaSortOrders
+        Move (ResizeArray(iaSortOrders,i+1,iSortOrder)) to iaSortOrders
+        Set piaSortOrders to iaSortOrders
+    End_Procedure
+
+    Procedure AssociateByIndex Integer iIndex String ByRef sKey Variant ByRef vValue Integer ByRef iSortOrder
+        Variant[] vaValues
+        Integer[] iaSortOrders
+
+        Get pvaValues to vaValues
+        Get piaSortOrders to iaSortOrders
+        
+        Get Value iIndex to sKey
+        Move vaValues[iIndex] to vValue
+        Move iaSortOrders[iIndex] to iSortOrder
+
+    End_Procedure
+
+    Procedure Associate String sKey Variant ByRef vValue Integer ByRef iSortOrder
+        Integer i iItem
+        String sStoredKey
+        Variant[] vaValues
+        Integer[] iaSortOrders
+      
+        While (i <= Item_Count(Self))
+            Get Value i to sStoredKey
+            If (sStoredKey = sKey) Begin
+                Get pvaValues to vaValues
+                Get piaSortOrders to iaSortOrders
+                Move vaValues[i] to vValue
+                Move iaSortOrders[i] to iSortOrder
+                Procedure_Return
+            End
+            Increment i
+        Loop        
+        
+        Move -1 to iSortOrder
+        
+    End_Procedure
+    
+End_Class
+
+//  The hash table class
+Class cHashTable is a cObject
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        Property Handle[] pBuckets
+        Property Integer piMaxBucketSize 64
+        Property Integer piMaxBucketCount 128
+        Property Integer piCount -1
+        Property Integer piCapacity 
+        Property Number pnLoadFactor 0.75
+        
+        //Calculate the initial maximum capacity
+        Set piCapacity to (piMaxBucketSize(Self) * piMaxBucketCount(Self))
+
+        Handle[] buckets
+        Integer i
+        For i from 0 to (piMaxBucketCount(Self)-1)
+            Move (Create(Self,U__cHashEntry)) to buckets[i]
+        Loop
+
+        Set pBuckets to buckets
+    End_Procedure
+    
+    { Visibility=Private }
+    Function _Hash String s Integer iMod Returns Integer
+        BigInt hash
+        Integer i
+        Char[] ca
+        Address aStr
+        Move 5381 to hash
+        Move (ResizeArray(ca,Length(s)+1)) to ca
+        Move (AddressOf(ca)) to aStr
+        Move s to aStr
+        Repeat
+            Move ((33 * hash) + ca[i]) to hash
+            Increment i
+        Until (ca[i] = 0)
+        If (hash > 0) Function_Return (hash - (iMod * (hash / iMod)))
+        Else Function_Return (iMod + (hash - (iMod * (hash / iMod))) - 1)
+    End_Function
+    
+    { Visibility=Private }
+    Procedure _Resize
+        Handle[] buckets_new
+        Handle[] buckets
+        Integer i ii iHash iBucketCount iSize iSortOrder
+        String sKey
+        Variant vValue
+
+        Get piMaxBucketCount to iBucketCount
+        Move (iBucketCount*2) to iBucketCount
+        Set piMaxBucketCount to iBucketCount
+        
+        Set piCapacity to (piMaxBucketSize(Self) * piMaxBucketCount(Self))
+        
+        Move (ResizeArray(buckets_new, iBucketCount)) to buckets_new
+
+        Get pBuckets to buckets
+
+        For i from 0 to (piMaxBucketCount(Self)-1)
+            Move (Create(Self,U__cHashEntry)) to buckets_new[i]
+        Loop
+
+        For i from 0 to ((iBucketCount/2)-1)
+            For ii from 0 to (Item_Count(buckets[i]) - 1)
+                Send AssociateByIndex of buckets[i] ii (&sKey) (&vValue) (&iSortOrder)
+                Move (_Hash(Self, sKey, iBucketCount)) to iHash
+                Send Put of buckets_new[iHash] sKey iSortOrder vValue
+            Loop         
+            Send Destroy of buckets[i]
+        Loop
+
+        Set pBuckets to buckets_new
+
+    End_Procedure
+
+    { Visibility=Public }
+    Procedure Set Value String sKey Variant vValue
+        Handle[] buckets
+        Integer iBucket iIndex iCount iSortOrder
+        Variant vStoredValue
+
+        Get piCount to iCount
+        
+        Get pBuckets to buckets
+        Move (_Hash(Self,sKey,piMaxBucketCount(Self))) to iBucket
+        
+        Send Associate of buckets[iBucket] sKey (&vStoredValue) (&iSortOrder)
+
+        If (iSortOrder = -1) Begin
+            Increment iCount
+            Move iCount to iSortOrder
+            Set piCount to iCount
+        End
+
+        Send Put of buckets[iBucket] sKey iSortOrder vValue
+
+        If (Number(piCount(Self)) / Number(piCapacity(Self)) > pnLoadFactor(Self)) Begin
+            Send _Resize
+        End
+  
+    End_Procedure
+    
+    { Visibility=Public }
+    Function Value String sKey Returns Variant
+        Handle[] buckets
+        Integer iBucket iIndex iCount iSortOrder
+        Variant vValue
+
+        Get piCount to iCount
+        
+        Get pBuckets to buckets
+        Move (_Hash(Self,sKey,piMaxBucketCount(Self))) to iBucket
+        
+        Send Associate of buckets[iBucket] sKey (&vValue) (&iSortOrder)
+
+        If (iSortOrder = -1) Begin
+            Move True to FindErr
+            Move False to Found
+            Function_Return NULL_ENTRY
+        End
+        Else Begin
+            Move False to FindErr
+            Move True to Found
+            Function_Return vValue
+        End
+        
+    End_Function
+    
+    { Visibility=Public }
+    Function Keys Returns String[]
+        Integer i ii iSize iSortOrder
+        String[] saKeys
+        Handle[] buckets
+        String sKey
+        Variant vValue
+        
+        Get pBuckets to buckets
+        Move (SizeOfArray(buckets)-1) to iSize 
+        
+        For i from 0 to iSize
+            For ii from 0 to (Item_Count(buckets[i]) - 1)
+                Send AssociateByIndex of buckets[i] ii (&sKey) (&vValue) (&iSortOrder)
+                Move sKey to saKeys[iSortOrder]
+            Loop
+        Loop
+        
+        Function_Return saKeys
+        
+    End_Function
+End_Class
