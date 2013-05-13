@@ -1,5 +1,8 @@
-//  cHashTable class:
-//  Created by Erik Svensson and published on eriksven.com in February 2013
+// cHashTable class v1.02:
+// Created by Erik Svensson and published on eriksven.com in February 2013
+// License: LGPLv3 - GNU LESSER GENERAL PUBLIC LICENSE Version 3 - http://www.gnu.org/licenses/lgpl.txt
+
+Define cHASHTABLE_INCLUDED for 1
 
 #IFNDEF NULL_ENTRY
 Global_Variable Variant NULL_ENTRY
@@ -106,7 +109,12 @@ Class cHashTable is a cObject
 
         Set pBuckets to buckets
     End_Procedure
-    
+
+    { Visibility=Public }
+    Function Is_cHashTable Returns Boolean
+        Function_Return True
+    End_Function
+
     { Visibility=Private }
     Function _Hash String s Integer iMod Returns Integer
         BigInt hash
