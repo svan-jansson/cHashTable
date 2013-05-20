@@ -1,4 +1,4 @@
-// cHashTable class v1.02:
+// cHashTable class v1.03:
 // Created by Erik Svensson and published on eriksven.com in February 2013
 // License: LGPLv3 - GNU LESSER GENERAL PUBLIC LICENSE Version 3 - http://www.gnu.org/licenses/lgpl.txt
 Define cHASHTABLE_INCLUDED for 1
@@ -221,11 +221,6 @@ Class cHashTable is a cObject
     End_Function
     
     { Visibility=Public }
-    Procedure DeleteKey String sKey
-        Set Value sKey to NULL_ENTRY
-    End_Procedure
-    
-    { Visibility=Public }
     Function Keys Returns String[]
         Integer i ii iSize iSortOrder
         String[] saKeys
@@ -239,9 +234,7 @@ Class cHashTable is a cObject
         For i from 0 to iSize
             For ii from 0 to (Item_Count(buckets[i]) - 1)
                 Send AssociateByIndex of buckets[i] ii (&sKey) (&vValue) (&iSortOrder)
-                If (vValue <> NULL_ENTRY) Begin
-                    Move sKey to saKeys[iSortOrder]
-                End
+                Move sKey to saKeys[iSortOrder]
             Loop
         Loop
         
