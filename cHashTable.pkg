@@ -39,8 +39,12 @@ Class _cHashEntry is a Array
         Loop
         Decrement i
         Set Value i to sKey
-        Get pvaValues to vaValues
+        Get pvaValues to vaValues        
+        #IF !@ < 170
+        Move vValue to vaValues[i]
+        #ELSE
         Move (ResizeArray(vaValues,i+1,vValue)) to vaValues
+        #ENDIF
         Set pvaValues to vaValues
         
         Get piaSortOrders to iaSortOrders
