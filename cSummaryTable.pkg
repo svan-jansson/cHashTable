@@ -1,0 +1,112 @@
+// cSummaryTable class v1.00:
+// Created by Erik Svensson and published on eriksven.com in November 2013
+// License: LGPLv3 - GNU LESSER GENERAL PUBLIC LICENSE Version 3 - http://www.gnu.org/licenses/lgpl.txt
+Define cSUMMARYTABLE_INCLUDED for 1
+
+Struct cSUMMARYTABLE_POST
+    String Key
+    Number Value
+End_Struct
+
+Class cSummaryTable is a cHashTable
+    
+    Procedure Construct_Object
+        Forward Send Construct_Object
+    End_Procedure
+
+    { Visibility=Public }
+    Function Is_cSummaryTable Returns Boolean
+        Function_Return True
+    End_Function
+    
+    Function _SortAscending cSUMMARYTABLE_POST p1 cSUMMARYTABLE_POST p2 Returns Integer
+        If (p1.Value > p2.Value) Function_Return (GT)
+        If (p1.Value < p2.Value) Function_Return (LT)
+        Function_Return (EQ)
+    End_Function
+    
+    Function _SortDescending cSUMMARYTABLE_POST p1 cSUMMARYTABLE_POST p2 Returns Integer
+        If (p1.Value < p2.Value) Function_Return (GT)
+        If (p1.Value > p2.Value) Function_Return (LT)
+        Function_Return (EQ)
+    End_Function
+    
+    Procedure Set Value String sKey Variant vValue
+        Error 999 "cSummatyTable does not support the Set Value method. Use Add instead."
+    End_Procedure
+    
+    { Visibility=Public }
+    Procedure Add String sKey Number nValue
+        Handle[] buckets
+        Integer iBucket iIndex iCount iSortOrder
+        Number nStoredValue
+
+        Get piCount to iCount
+        
+        Get pBuckets to buckets
+        Move (_Hash(Self,sKey,piMaxBucketCount(Self))) to iBucket
+        
+        Send Associate of buckets[iBucket] sKey (&nStoredValue) (&iSortOrder)
+
+        If (iSortOrder = -1) Begin
+            Increment iCount
+            Move iCount to iSortOrder
+            Set piCount to iCount
+        End
+
+        Send Put of buckets[iBucket] sKey iSortOrder (nStoredValue + nValue)
+
+        If (Number(piCount(Self)) / Number(piCapacity(Self)) > pnLoadFactor(Self)) Begin
+            Send _Resize
+        End
+  
+    End_Procedure
+    
+    { Visibility=Public }
+    Function Value String sKey Returns Number
+        Handle[] buckets
+        Integer iBucket iIndex iCount iSortOrder
+        Number nValue
+
+        Get piCount to iCount
+        
+        Get pBuckets to buckets
+        Move (_Hash(Self,sKey,piMaxBucketCount(Self))) to iBucket
+        
+        Send Associate of buckets[iBucket] sKey (&nValue) (&iSortOrder)
+
+        If (iSortOrder = -1) Begin
+            Move True to FindErr
+            Move False to Found
+            Function_Return 0
+        End
+        Else Begin
+            Move False to FindErr
+            Move True to Found
+            Function_Return nValue
+        End
+        
+    End_Function
+
+    { Visibility=Public }
+    Procedure SortKeysBySum String[] ByRef saKeys Boolean bDescending
+        cSUMMARYTABLE_POST[] data
+        Integer i
+        
+        For i from 0 to (SizeOfArray(saKeys) -1)
+            Move saKeys[i] to data[i].Key
+            Get Value saKeys[i] to data[i].Value
+        Loop
+        
+        Move (ResizeArray(saKeys,0)) to saKeys
+        
+        If (bDescending) Move (SortArray(data, Self, get__SortDescending)) to data
+        Else Move (SortArray(data, Self, get__SortAscending)) to data
+        
+        For i from 0 to (SizeOfArray(data)-1)
+            Move data[i].Key to saKeys[i]
+        Loop
+        
+    End_Procedure
+    
+End_Class
