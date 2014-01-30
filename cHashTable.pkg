@@ -1,4 +1,4 @@
-// cHashTable class v1.05:
+// cHashTable class v1.06:
 // Created by Erik Svensson and published on eriksven.com in February 2013
 // License: LGPLv3 - GNU LESSER GENERAL PUBLIC LICENSE Version 3 - http://www.gnu.org/licenses/lgpl.txt
 Define cHASHTABLE_INCLUDED for 1
@@ -6,6 +6,11 @@ Define cHASHTABLE_INCLUDED for 1
 #IFNDEF NULL_ENTRY
 Global_Variable Variant NULL_ENTRY
 Move (Character(0)) to NULL_ENTRY
+#ENDIF
+
+#IFNDEF NULL_KEY
+Global_Variable Variant NULL_KEY
+Move (Character(255)) to NULL_KEY
 #ENDIF
 
 Class _cHashEntry is a Array
@@ -170,13 +175,20 @@ Class cHashTable is a cObject
         Set pBuckets to buckets_new
 
     End_Procedure
-
+    
+    Procedure _ProcessKey String ByRef sKey
+        If (sKey = "") Move NULL_KEY to sKey
+        Else If (sKey = NULL_KEY) Move "" to sKey
+    End_Procedure
+    
     { Visibility=Public }
     Procedure Set Value String sKey Variant vValue
         Handle[] buckets
         Integer iBucket iIndex iCount iSortOrder
         Variant vStoredValue
-
+        
+        Send _ProcessKey (&sKey)
+        
         Get piCount to iCount
         
         Get pBuckets to buckets
@@ -203,7 +215,9 @@ Class cHashTable is a cObject
         Handle[] buckets
         Integer iBucket iIndex iCount iSortOrder
         Variant vValue
-
+        
+        Send _ProcessKey (&sKey)
+        
         Get piCount to iCount
         
         Get pBuckets to buckets
@@ -238,6 +252,7 @@ Class cHashTable is a cObject
         For i from 0 to iSize
             For ii from 0 to (Item_Count(buckets[i]) - 1)
                 Send AssociateByIndex of buckets[i] ii (&sKey) (&vValue) (&iSortOrder)
+                Send _ProcessKey (&sKey)
                 Move sKey to saKeys[iSortOrder]
             Loop
         Loop
