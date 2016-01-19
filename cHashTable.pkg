@@ -1,4 +1,4 @@
-// cHashTable class v1.07:
+// cHashTable class v1.08:
 // Created by Erik Svensson and published on eriksven.com in February 2013
 // License: LGPLv3 - GNU LESSER GENERAL PUBLIC LICENSE Version 3 - http://www.gnu.org/licenses/lgpl.txt
 Define cHASHTABLE_INCLUDED for 1
@@ -34,7 +34,7 @@ Class _cHashEntry is a Array
         Move 0 to i
         While (i <= Item_Count(Self))
             Get Value i to sStoredKey
-            If (sStoredKey = sKey) Begin
+            If (sStoredKey = sKey and Length(sStoredKey) = Length(sKey)) Begin
                 Get pvaValues to vaValues
                 Get _Update vValue vaValues i to vaValues
                 Set pvaValues to vaValues
@@ -78,7 +78,7 @@ Class _cHashEntry is a Array
       
         While (i <= Item_Count(Self))
             Get Value i to sStoredKey
-            If (sStoredKey = sKey) Begin
+            If (sStoredKey = sKey and Length(sStoredKey) = Length(sKey)) Begin
                 Get pvaValues to vaValues
                 Get piaSortOrders to iaSortOrders
                 Move vaValues[i] to vValue
