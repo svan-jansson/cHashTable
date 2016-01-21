@@ -1,4 +1,4 @@
-// cSummaryTable class v1.00:
+// cSummaryTable class v1.01:
 // Created by Erik Svensson and published on eriksven.com in November 2013
 // License: LGPLv3 - GNU LESSER GENERAL PUBLIC LICENSE Version 3 - http://www.gnu.org/licenses/lgpl.txt
 Define cSUMMARYTABLE_INCLUDED for 1
@@ -32,7 +32,7 @@ Class cSummaryTable is a cHashTable
     End_Function
     
     Procedure Set Value String sKey Variant vValue
-        Error 999 "cSummatyTable does not support the Set Value method. Use Add instead."
+        Error 999 "cSummaryTable does not support the Set Value method. Use Add instead."
     End_Procedure
     
     { Visibility=Public }
@@ -40,7 +40,12 @@ Class cSummaryTable is a cHashTable
         Handle[] buckets
         Integer iBucket iIndex iCount iSortOrder
         Number nStoredValue
-
+        
+        Move (Rtrim(sKey)) to sKey
+        If (sKey = "") Begin
+            Move " " to sKey
+        End
+        
         Get piCount to iCount
         
         Get pBuckets to buckets
@@ -67,7 +72,12 @@ Class cSummaryTable is a cHashTable
         Handle[] buckets
         Integer iBucket iIndex iCount iSortOrder
         Number nValue
-
+        
+        Move (Rtrim(sKey)) to sKey
+        If (sKey = "") Begin
+            Move " " to sKey
+        End
+        
         Get piCount to iCount
         
         Get pBuckets to buckets
