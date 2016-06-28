@@ -1,4 +1,4 @@
-// cHashTable class v1.08:
+// cHashTable class v1.09:
 // Created by Erik Svensson and published on eriksven.com in February 2013
 // License: LGPLv3 - GNU LESSER GENERAL PUBLIC LICENSE Version 3 - http://www.gnu.org/licenses/lgpl.txt
 Define cHASHTABLE_INCLUDED for 1
@@ -27,12 +27,13 @@ Class _cHashEntry is a Array
     End_Function
 
     Procedure Put String sKey Integer iSortOrder Variant vValue
-        Integer i iItem
+        Integer i iItem iLastItem
         String sStoredKey
         Variant[] vaValues
         Integer[] iaSortOrders
         Move 0 to i
-        While (i <= Item_Count(Self))
+        Get Item_Count to iLastItem
+        While (i <= iLastItem)
             Get Value i to sStoredKey
             If (sStoredKey = sKey and Length(sStoredKey) = Length(sKey)) Begin
                 Get pvaValues to vaValues
@@ -71,12 +72,12 @@ Class _cHashEntry is a Array
     End_Procedure
 
     Procedure Associate String sKey Variant ByRef vValue Integer ByRef iSortOrder
-        Integer i iItem
+        Integer i iItem iLastItem
         String sStoredKey
         Variant[] vaValues
         Integer[] iaSortOrders
-      
-        While (i <= Item_Count(Self))
+        Get Item_Count to iLastItem
+        While (i <= iLastItem)
             Get Value i to sStoredKey
             If (sStoredKey = sKey and Length(sStoredKey) = Length(sKey)) Begin
                 Get pvaValues to vaValues
@@ -145,7 +146,7 @@ Class cHashTable is a cObject
     Procedure _Resize
         Handle[] buckets_new
         Handle[] buckets
-        Integer i ii iHash iBucketCount iSize iSortOrder
+        Integer i ii iHash iBucketCount iSize iSortOrder iLastItem
         String sKey
         Variant vValue
 
@@ -164,7 +165,8 @@ Class cHashTable is a cObject
         Loop
 
         For i from 0 to ((iBucketCount/2)-1)
-            For ii from 0 to (Item_Count(buckets[i]) - 1)
+            Move (Item_Count(buckets[i]) - 1) to iLastItem
+            For ii from 0 to iLastItem
                 Send AssociateByIndex of buckets[i] ii (&sKey) (&vValue) (&iSortOrder)
                 Move (_Hash(Self, sKey, iBucketCount)) to iHash
                 Send Put of buckets_new[iHash] sKey iSortOrder vValue
