@@ -101,11 +101,23 @@ Class cHashTable is a cObject
     Procedure Construct_Object
         Forward Send Construct_Object
         Property Handle[] pBuckets
-        Property Integer piMaxBucketSize 64
-        Property Integer piMaxBucketCount 128
+        Property Integer piMaxBucketSize
+        Property Integer piMaxBucketCount
         Property Integer piCount -1
         Property Integer piCapacity 
         Property Number pnLoadFactor 0.75
+        
+        Send _InitializeBuckets
+        
+        Forward Send Construct_Object
+    End_Procedure
+    
+    { Visibility=Private }
+    Procedure _InitializeBuckets
+        
+        Set piMaxBucketSize to 64
+        Set piMaxBucketCount to 128
+        Set piCount to -1 
         
         //Calculate the initial maximum capacity
         Set piCapacity to (piMaxBucketSize(Self) * piMaxBucketCount(Self))
@@ -263,5 +275,19 @@ Class cHashTable is a cObject
         Function_Return saKeys
         
     End_Function
+    
+    { Visibility=Public }
+    Procedure Clear
+        Handle[] buckets
+        Integer iSize i
+        
+        Get pBuckets to buckets
+        Move (SizeOfArray(buckets)-1) to iSize
+        For i from 0 to iSize
+            Send Destroy of buckets[i]
+        Loop
+        
+        Send _InitializeBuckets
+    End_Procedure
 
 End_Class
