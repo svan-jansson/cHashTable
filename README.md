@@ -1,5 +1,5 @@
 # cHashTable
-A hash table class for Dataflex that supports values of any type, from basic types to structs and arrays. Since the Dataflex standard library does't include a dictionary type, you are free and safe to use this library. It's been around since 2013 and is actively maintained in 2020.
+A hash table class for Dataflex that supports values of any type, from basic types to structs and arrays. Since the Dataflex standard library doesn't include a dictionary type, you are free and safe to download and use this library if you need one. It's been around since 2013 and is actively maintained in 2020.
 
 ## Code Examples
 
