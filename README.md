@@ -4,14 +4,12 @@ A hash table class for Dataflex that supports values of any type, from basic typ
 
 Supported and tested on DataFlex 14.1-20.0, it most likely works on more versions.
 
+If you are using DataFlex 14.1-18.0, add a use statement for [DFCompatibilityLayer](https://github.com/ekstrom/DFCompatibilityLayer). It includes the function StringToUCharArray, which does not exist in DataFlex 14.1-18.0.
+
 ## Code Examples
 
 ```dataflex
 Use cHashTable.pkg
-
-// Optional: If you are using DataFlex 14.1-18.0, add a use statement for [DFCompatibilityLayer](https://github.com/ekstrom/DFCompatibilityLayer)
-// It includes the function StringToUCharArray, which does not exist in DataFlex 14.1-18.0
-Use DFCompatibilityLayer.pkg
 
 ...
 
