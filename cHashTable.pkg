@@ -139,17 +139,14 @@ Class cHashTable is a cObject
     { Visibility=Private }
     Function _Hash String s Integer iMod Returns Integer
         BigInt hash
-        Integer i
-        Char[] ca
-        Address aStr
+        Integer i iLastIndex
+        UChar[] uca
         Move 5381 to hash
-        Move (ResizeArray(ca,Length(s)+1)) to ca
-        Move (AddressOf(ca)) to aStr
-        Move s to aStr
-        Repeat
-            Move ((33 * hash) + ca[i]) to hash
-            Increment i
-        Until (ca[i] = 0)
+        Move (StringToUCharArray(s)) to uca
+        Move (SizeOfArray(uca) - 1) to iLastIndex
+        For i from 0 to iLastIndex
+            Move ((33 * hash) + uca[i]) to hash
+        Loop
         If (hash > 0) Function_Return (hash - (iMod * (hash / iMod)))
         Else Function_Return (iMod + (hash - (iMod * (hash / iMod))) - 1)
     End_Function
